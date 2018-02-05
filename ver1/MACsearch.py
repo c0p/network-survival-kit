@@ -1,16 +1,18 @@
 import urllib2
 import json
+import codecs
 
-MACaddr = "BC:92:6B:A0:00:01"
+MACaddr = raw_input("enter MAC address > ")
 url = "http://macvendors.co/api/"
 
 request = urllib2.Request(url+MACaddr, headers={'User-Agent' : "API Browser"}) 
 
 
 response = urllib2.urlopen( request )
+reader = codecs.getreader("utf-8")
+obj = json.load(reader(response))
 
-obj = json.load(response)
+company =obj['result']['company']
+address =obj['result']['address']
 
-print (obj['result']['company']);
-
-
+print(company.encode("ascii","replace"),address.encode("ascii","replace"))
