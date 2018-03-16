@@ -1,5 +1,5 @@
 import socket
-from multiprocessing.dummy import Pool as ThreadPool 
+from multiprocessing.dummy import Pool as ThreadPool
 
 data = raw_input("enter :")
 ip = socket.gethostbyname(data)
@@ -15,7 +15,7 @@ userPorts = [ ]
 for portNum in range(int(start),int(end)+1):
     userPorts.append(portNum)
 
-    
+
 openPorts = [ ]
 
 def checkPort(portNum):
@@ -26,12 +26,12 @@ def checkPort(portNum):
 pool = ThreadPool(15)
 
 
-        
+
 results = pool.map(checkPort, userPorts)
 
 pool.close()
 pool.join()
-
+if len(openPorts) == 0:
+    print "nothing"
 for i in range(len(openPorts)):
     print "PORT %s : OPEN" % (openPorts[i])
-
