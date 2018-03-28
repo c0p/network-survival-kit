@@ -1,8 +1,8 @@
 import urllib2
 from bs4 import BeautifulSoup
-
-
-
+import re
+import datetime
+import time
 
 class Scrap:
 
@@ -23,22 +23,68 @@ class Scrap:
       for tag in specificVal:
        OverallVal+= " " + tag.text
 
-    return OverallVal
+    string = """
+    Single Value
+    ---------------
+    {value}
+    ---------------
+
+    """
+
+
+    # return string.format(value = OverallVal)
+    return string.format(value = OverallVal)
 
   def getMarketValue(self):
-      MarkCapDiv = self.soup.find("div", {"class": "coin-summary-item-detail details-text-medium"})
-      MarkCapValues = MarkCapDiv.find_all("span")
-      return "Market Cap " + MarkCapValues[3].text.strip() + " => " + MarkCapValues[1].text + " " + MarkCapValues[2].text
+    MarkCapDiv = self.soup.find("div", {"class": "coin-summary-item-detail details-text-medium"})
+    MarkCapValues = MarkCapDiv.find_all("span")
+    USDvalue = MarkCapValues[1].text + " " + MarkCapValues[2].text
+    BTCvalue = re.findall(r'\d+(?:,\d+)?',  MarkCapValues[3].text.strip())
+    string = """
+    Market Cap
+    ---------------
+    ${USD} => BTC{BTC}
+    ---------------
+    """
+
+    return string.format(USD = USDvalue, BTC = BTCvalue)
+
+
 
   def getVolume24hr(self):
     VolumeDiv = self.soup.find_all("div", {"class": "coin-summary-item"})[1]
-    return VolumeDiv.find("h3").text + " " + VolumeDiv.find_all("span")[0].text + " BTC: " + VolumeDiv.find_all("span")[4].text
+    print( VolumeDiv.find_all("span")[4].text.split(" "))
+    btcPrice = re.findall(r'\d+(?:,\d+)?', VolumeDiv.find_all("span")[4].text)
+    string = """
+    {title} 
+    ---------------
+    {USD} => {BTC}BTC
+    ---------------
+
+    """
+
+    return string.format(title = VolumeDiv.find("h3").text, USD= "$" + VolumeDiv.find_all("span")[1].text, BTC=btcPrice)
+
+  def getAll(self):
+    sin =self.getSingle()
+    mv = self.getMarketValue()
+    v24 = self.getVolume24hr()
+    time = datetime.datetime.now().strftime("%a, %d %B %Y %I:%M:%S")
+    btcTXTFILE = open("bitcoin.txt", "w")
+    btcTXTFILE.write(time + sin + mv + v24)
+    btcTXTFILE.close()
 
 
+def scuffedCronJob():
+    Scrap('https://coinmarketcap.com/currencies/bitcoin/').getAll()
 
-print(Scrap('https://coinmarketcap.com/currencies/bitcoin/').getVolume24hr())
 
+while True:
+    scuffedCronJob()
+    print("refreshed")
+    time.sleep(2) # wait one minute
 
+'''
 def scrape(url):
 
   request = urllib2.Request(url);
@@ -66,3 +112,5 @@ def scrape(url):
 
 
 scrape('https://coinmarketcap.com/currencies/bitcoin/');
+
+'''
