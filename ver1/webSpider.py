@@ -4,6 +4,9 @@ import re
 import datetime
 import time
 
+
+
+#stretch goals
 class Scrap:
 
   def __init__(self, url):
@@ -23,6 +26,7 @@ class Scrap:
       for tag in specificVal:
        OverallVal+= " " + tag.text
 
+    #returns 1BTC value in USD
     string = """
     Single Value
     ---------------
@@ -47,13 +51,13 @@ class Scrap:
     ---------------
     """
 
+    #returns Market Value value in USD
     return string.format(USD = USDvalue, BTC = BTCvalue)
 
 
 
   def getVolume24hr(self):
     VolumeDiv = self.soup.find_all("div", {"class": "coin-summary-item"})[1]
-    print( VolumeDiv.find_all("span")[4].text.split(" "))
     btcPrice = re.findall(r'\d+(?:,\d+)?', VolumeDiv.find_all("span")[4].text)
     string = """
     {title} 
@@ -63,9 +67,12 @@ class Scrap:
 
     """
 
+     #returns getVolume24hr value in USD
     return string.format(title = VolumeDiv.find("h3").text, USD= "$" + VolumeDiv.find_all("span")[1].text, BTC=btcPrice)
 
   def getAll(self):
+
+    #this calls every class functions
     sin =self.getSingle()
     mv = self.getMarketValue()
     v24 = self.getVolume24hr()
@@ -74,16 +81,24 @@ class Scrap:
     btcTXTFILE.write(time + sin + mv + v24)
     btcTXTFILE.close()
 
-
 def scuffedCronJob():
     Scrap('https://coinmarketcap.com/currencies/bitcoin/').getAll()
 
-
+#scuffed cronjob (while loop)
 while True:
     scuffedCronJob()
-    print("refreshed")
+    print("refreshed | " + datetime.datetime.now().strftime("%a, %d %B %Y %I:%M:%S") )
     time.sleep(2) # wait one minute
 
+
+
+
+
+
+
+
+
+#original code. 
 '''
 def scrape(url):
 
